@@ -1,0 +1,24 @@
+{
+  "name": "shapes",
+  "version": "1.0.0",
+  "description": "productivity tool and shape viewer",
+  "homepage": "https://github.com/neoladsouza/shapes#readme",
+  "bugs": {
+    "url": "https://github.com/neoladsouza/shapes/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neoladsouza/shapes.git"
+  },
+  "license": "ISC",
+  "author": "Neola Dsouza",
+  "type": "module",
+  "main": "index.js",
+  "private": "true",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}

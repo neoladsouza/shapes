@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shapes</title>
+</head>
+
+<body>
+    <h1>hello</h1>
+    <form>
+        <div id="task-section">
+            <div class="task">
+                <label>Task: <input type="text" id="task-1" /></label>
+            </div>
+
+            <div class="task">
+                <label for="task-2">Task: <input type="text" id="task-2" /></label>
+            </div>
+
+            <div class="task">
+                <label for="task-3">Task: <input type="text" id="task-3" /></label>
+            </div>
+        </div>
+
+        <button type="button" id="add-task-btn">Add Task</button>
+        <button type="button" id="remove-task-btn">Remove Task</button>
+        <button type="reset">Clear All Tasks</button>
+        <button type="button" id="generate-shape-btn">Generate Shape</button>
+    </form>
+
+    <div id="shape-container">
+        <svg width="400" height="400" id="shape-svg" xmlns="http://www.w3.org/2000/xmlns/">
+        </svg>
+    </div>
+
+    <div id="results-container"></div>
+
+    <script src="./src/main.js"></script>
+</body>
+
+</html>
