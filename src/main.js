@@ -9,6 +9,7 @@ const submitButton = document.getElementById("generate-shape-btn")
 let sides = 0;
 const radius = 120;
 const center = { x: 200, y: 200 }
+const labelOffset = 25;
 
 function countTasks() {
     for (const child of taskSection.children) {
@@ -62,8 +63,8 @@ function generateShape() {
     while (k < sides) {
         const angle = ((k / sides) * 2 * Math.PI) - Math.PI / 2; // moves anchor point to the top
         vertices.push({
-            x: center.x + radius * Math.cos(angle),
-            y: center.y + radius * Math.sin(angle)
+            x: Math.round(center.x + radius * Math.cos(angle)),
+            y: Math.round(center.y + radius * Math.sin(angle))
         });
         console.log(`Vertex ${k}: (${vertices[k].x}, ${vertices[k].y})`);
         k += 1;
@@ -73,11 +74,30 @@ function generateShape() {
     while (i < vertices.length) {
         v1 = vertices[i];
         const v2 = vertices[(i + 1) % vertices.length]
+
+        const midpointX = Math.round((v1.x + v2.x) / 2);
+        const midpointY = Math.round((v1.y + v2.y) / 2);
+        const dx = v2.x - v1.x;
+        const dy = v2.y - v1.y;
+        let perpX = -dy; 
+        let perpY = dx;
+        const perpLength = Math.round(Math.sqrt(perpX**2 + perpY**2));
+        perpX = Math.round(perpX / perpLength);
+        perpY = Math.round(perpY / perpLength);
+        const outwardX = midpointX - center.x;
+        const outwardY = midpointY - center.y;
+        if (perpX * outwardX + perpY * outwardY < 0) {
+            perpX = -perpX;
+            perpY = -perpY;
+        }
+
         segments.push({
             x1: v1.x,
             y1: v1.y,
             x2: v2.x,
             y2: v2.y,
+            labelX: Math.round(midpointX + perpX * labelOffset),
+            labelY: Math.round(midpointY + perpY * labelOffset),
             task: i + 1
         });
         i += 1;
@@ -95,6 +115,15 @@ function generateShape() {
         line.setAttribute("stroke-width", "5");
         line.setAttribute("stroke", "#7a93ba");
         shapeSVG.appendChild(line);
+
+        const text = document.createElementNS(svgNS, "text");
+        text.setAttribute("x", segment.labelX);
+        text.setAttribute("y", segment.labelY);
+        text.setAttribute("fill", "black");
+        text.setAttribute("font-size", "14");
+        text.setAttribute("font-weight", "bold");
+        text.textContent = `${segment.task}`;
+        shapeSVG.appendChild(text);
         i += 1;
     }
 
