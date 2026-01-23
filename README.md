@@ -1,2 +1,2 @@
 # shapes
-shape your decisions
+shape your decisions with a neat productivity tool!
