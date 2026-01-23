@@ -1,14 +1,22 @@
-console.log("amongus");
-const svgNS = "http://www.w3.org/2000/svg";
-
+const taskSection = document.getElementById("task-section");
 const addTaskButton = document.getElementById("add-task-btn");
 const removeTaskButton = document.getElementById("remove-task-btn");
-const taskSection = document.getElementById("task-section");
+const generateButton = document.getElementById("generate-shape-btn")
+const rotateShapeButton = document.getElementById("rotate-shape-btn");
+// const resultsDiv = document.getElementById("results-container");
+
+const svgNS = "http://www.w3.org/2000/svg";
 const shapeSVG = document.getElementById("shape-svg");
-const submitButton = document.getElementById("generate-shape-btn")
-let sides = 0;
 const radius = 120;
 const center = { x: 200, y: 200 }
+let vertices = [];
+let segments = [];
+
+let sides = 0;
+let currentAngle = 0;
+let targetAngle = 0;
+let fullRotations = 0;
+let isSpinning = false;
 
 function countTasks() {
     for (const child of taskSection.children) {
@@ -48,27 +56,26 @@ function removeTask() {
     }
 }
 
-function generateShape() {
-    if (shapeSVG.hasChildNodes()) {
-        while (shapeSVG.firstChild) {
-            shapeSVG.removeChild(shapeSVG.firstChild);
-        }
-    }
-
-    vertices = []
-    segments = []
-    // calculate the coordinates of the shape's vertices + store in a list
+function calculateVertices() {
+    vertices = [];
     let k = 0;
+    const anglePerSide = (2 * Math.PI) / sides;
+    // ensures even-sided shapes start off with a side at the bottom
+    const evenSideOffset = (sides % 2 == 0) ? (anglePerSide / 2) : 0; 
     while (k < sides) {
-        const angle = ((k / sides) * 2 * Math.PI) - Math.PI / 2; // moves anchor point to the top
+        // using pi instead of 180 since cos() and sin() need radians
+        const angle = ((k / sides) * 2 * Math.PI) - Math.PI / 2 + evenSideOffset;
         vertices.push({
             x: center.x + radius * Math.cos(angle),
             y: center.y + radius * Math.sin(angle)
         });
-        console.log(`Vertex ${k}: (${vertices[k].x}, ${vertices[k].y})`);
         k += 1;
     }
+}
+
+function calculateLineSegments(vertices) {
     // calculate the attributes for each line segment based on each vertex as a starting point
+    segments = [];
     let i = 0;
     while (i < vertices.length) {
         v1 = vertices[i];
@@ -82,23 +89,32 @@ function generateShape() {
         });
         i += 1;
     }
+}
 
-    // add each line to the SVG element
+function drawLineSegments() {
     i = 0;
     while (i < segments.length) {
-        segment = segments[i];
+        const segment = segments[i];
         const line = document.createElementNS(svgNS, "line");
         line.setAttribute("x1", segment.x1);
         line.setAttribute("y1", segment.y1);
         line.setAttribute("x2", segment.x2);
         line.setAttribute("y2", segment.y2);
         line.setAttribute("stroke-width", "5");
-        line.setAttribute("stroke", "#7a93ba");
+        if (segment.task % 3 == 0) {
+            line.setAttribute("stroke", "green");
+        }
+        else if (segment.task % 2 == 0) {
+            line.setAttribute("stroke", "blue");
+        } else {
+            line.setAttribute("stroke", "red");
+        }
         shapeSVG.appendChild(line);
         i += 1;
     }
+}
 
-    // draw vertices
+function drawVertices() {
     i = 0;
     while (i < vertices.length) {
         vertex = vertices[i];
@@ -106,7 +122,7 @@ function generateShape() {
         circle.setAttribute("cx", vertex.x);
         circle.setAttribute("cy", vertex.y);
         circle.setAttribute("r", "5");
-        circle.setAttribute("fill", "#7a93ba");
+        circle.setAttribute("fill", "black");
         circle.setAttribute("stroke-width", "2.5");
         circle.setAttribute("stroke", "black");
         shapeSVG.appendChild(circle);
@@ -114,8 +130,59 @@ function generateShape() {
     }
 }
 
+function generateShape() {
+    if (shapeSVG.hasChildNodes()) {
+        while (shapeSVG.firstChild) {
+            shapeSVG.removeChild(shapeSVG.firstChild);
+        }
+    }
+
+    // reset the SVG's rotation
+    shapeSVG.setAttribute("transform", `rotate(0, ${center.x}, ${center.y})`);
+
+    calculateVertices();
+    calculateLineSegments(vertices);
+    drawLineSegments();
+    drawVertices();
+}
+
+function rotateShape() {
+    const anglePerSide = Math.round(360 / sides);
+    const randomSide = Math.floor(Math.random() * sides);
+
+    // reset
+    shapeSVG.setAttribute("transform", `rotate(0, ${center.x}, ${center.y})`);
+    currentAngle = 0;
+
+    fullRotations = 2 + Math.floor(Math.random() * 2);
+    targetAngle = currentAngle + (fullRotations * 360) + 360 - (randomSide * anglePerSide);
+    isSpinning = true;
+
+    animate();
+}
+
+function animate() {
+    if (!isSpinning) return;
+
+    const distanceToTarget = targetAngle - currentAngle;
+
+    if (Math.abs(distanceToTarget) < 0.1) {
+        currentAngle = targetAngle;
+        isSpinning = false;
+    } else {
+        currentAngle += distanceToTarget * 0.025;
+    }
+
+    shapeSVG.setAttribute('transform', `rotate(${currentAngle}, ${center.x}, ${center.y})`);
+
+    if (isSpinning) {
+        requestAnimationFrame(animate);
+    }
+}
+
+
 countTasks();
 addTaskButton.addEventListener("click", addTask);
 removeTaskButton.addEventListener("click", removeTask);
-// window.onsubmit = generateShape;
-submitButton.addEventListener("click", generateShape);
+generateButton.addEventListener("click", generateShape);
+rotateShapeButton.addEventListener("click", rotateShape);
